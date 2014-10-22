@@ -18,13 +18,13 @@ public class STLSurfaceView extends GLSurfaceView {
         super(context);
         boolean isTransparent = context.getSharedPreferences("settings",0).getBoolean("transparent",true);
         setEGLContextClientVersion(2);
-        if(isTransparent) {
+        if(isTransparent != true) {
             setEGLConfigChooser(8, 8, 8, 8, 16, 0);
             getHolder().setFormat(PixelFormat.TRANSLUCENT);
         }
         mRenderer = new STLRenderer(this);
         setRenderer(mRenderer);
-
+        //setRenderMode(RENDERMODE_WHEN_DIRTY);
     }
     float mPreviousX;
     float mPreviousY;
@@ -61,18 +61,5 @@ public class STLSurfaceView extends GLSurfaceView {
         mPreviousX = x;
         mPreviousY = y;
         return true;
-    }
-    public static int loadShader(int type, String shaderCode){
-
-        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
-        int shader = GLES20.glCreateShader(type);
-
-        // add the source code to the shader and compile it
-        GLES20.glShaderSource(shader, shaderCode);
-        GLES20.glCompileShader(shader);
-        Log.e(TAG, GLES20.glGetShaderInfoLog(shader));
-
-        return shader;
     }
 }

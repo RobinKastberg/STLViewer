@@ -1,14 +1,14 @@
 package org.kastberg.stlviewer;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
 
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -19,10 +19,22 @@ class STLRenderer implements GLSurfaceView.Renderer {
     private static final String TAG = "STLRenderer";
 
     public STLRenderer(STLSurfaceView glSurfaceView) {
-        this.glSurfaceView = glSurfaceView;
 
-        vertexShaderCode   = glSurfaceView.getResources().getString(R.string.vertex_shader);
-        fragmentShaderCode = glSurfaceView.getResources().getString(R.string.fragment_shader);
+        this.glSurfaceView = glSurfaceView;
+    }
+
+    public static int loadShader(int type, String shaderCode){
+
+        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
+        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
+        int shader = GLES20.glCreateShader(type);
+
+        // add the source code to the shader and compile it
+        GLES20.glShaderSource(shader, shaderCode);
+        GLES20.glCompileShader(shader);
+        Log.e(TAG, GLES20.glGetShaderInfoLog(shader));
+
+        return shader;
     }
 
     public void checkGlError(String glOperation) {
@@ -33,9 +45,7 @@ class STLRenderer implements GLSurfaceView.Renderer {
         }
     }
     public volatile float mAngle;
-    private String vertexShaderCode;
 
-    private String fragmentShaderCode;
     private FloatBuffer vertexBuffer;
     private FloatBuffer normalBuffer;
     int mProgram;
@@ -46,48 +56,27 @@ class STLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig eglConfig) {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        InputStream boobpoop = glSurfaceView.getResources().openRawResource(R.raw.duck);
-        byte[] header = new byte[80];
-        byte[] triangles = new byte[4];
-        try {
-            boobpoop.read(header);
-            boobpoop.read(triangles);
-        } catch(IOException e) {
-            Log.e("Boobpoop","you are bad and should feel bad.");
-        }
-        Log.e("stlviewer",new String(header));
-        ByteBuffer wrapped = ByteBuffer.wrap(triangles);
-        wrapped = wrapped.order(ByteOrder.LITTLE_ENDIAN);
-        int numOfTriangles = (int)(((long)wrapped.getInt()&0xffffffff));
-        Log.e("numofTraingles",""+numOfTriangles);
-        vertexCount = numOfTriangles*3;
-
-        vertexBuffer = ByteBuffer.allocateDirect(numOfTriangles*3*3*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        normalBuffer = ByteBuffer.allocateDirect(numOfTriangles*3*3*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        for(int i=0;i<numOfTriangles;i++)
-        {
-            byte[] triangle = new byte[50];
+        Intent in = ((Activity)glSurfaceView.getContext()).getIntent();
+        InputStream is = null;
+        if(in.getAction().equals("android.intent.action.VIEW"))
             try {
-                boobpoop.read(triangle);
-            } catch(IOException e) {
-                Log.e(TAG,"you are bad and should feel bad.");
+                is = glSurfaceView.getContext().getContentResolver().openInputStream(in.getData());
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             }
-            FloatBuffer normal = ByteBuffer.wrap(triangle,0,12).order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer();
-            FloatBuffer tri = ByteBuffer.wrap(triangle,12,4*3*3).order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer();
-            short attr = ByteBuffer.wrap(triangle,48,2).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(0);
-            vertexBuffer.put(tri);
-            normalBuffer.put(normal);normal.position(0);
-            normalBuffer.put(normal);normal.position(0);
-            normalBuffer.put(normal);normal.position(0);
-        }
-
-        vertexBuffer.position(0);
+        else
+            is = glSurfaceView.getResources().openRawResource(R.raw.boobpoop);
+        STLModel model = STLLoader.fromInputStream(is);
+        model.center();
+        model.scale();
+        vertexBuffer = model.vertexBuffer();
         Log.e(TAG,vertexBuffer.toString());
-        Log.e(TAG,normalBuffer.toString());
-        normalBuffer.position(0);
-
-        int vertexShader = STLSurfaceView.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
-        int fragmentShader = STLSurfaceView.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+        normalBuffer = model.normalBuffer();
+        vertexCount = model.len;
+        int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER,
+                glSurfaceView.getResources().getString(R.string.vertex_shader));
+        int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER,
+                glSurfaceView.getResources().getString(R.string.fragment_shader));
 
         mProgram = GLES20.glCreateProgram();             // create empty OpenGL ES Program
         GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
@@ -102,7 +91,7 @@ class STLRenderer implements GLSurfaceView.Renderer {
         float ratio = (float) width / height;
 
         // create a projection matrix from device screen geometry
-        Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 1, 10);
+        Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 1, 100);
     }
     final int COORDS_PER_VERTEX = 3;
     private int vertexStride = Float.SIZE * COORDS_PER_VERTEX;
@@ -110,8 +99,8 @@ class STLRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 unused) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        GLES20.glEnable(GLES20.GL_DITHER);
         GLES20.glUseProgram(mProgram);
-
         // get handle to vertex shader's vPosition member
         int mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
         checkGlError("glGetAttribLocation");
@@ -123,12 +112,9 @@ class STLRenderer implements GLSurfaceView.Renderer {
         float[] mMMatrix = new float[16];
         float[] mMVMatrix = new float[16];
         Matrix.setIdentityM(mMMatrix,0);
-        Matrix.translateM(mMMatrix,0,-1.0f,0f,0f);
         Matrix.rotateM(mMMatrix,0,mAngle,-1.0f,0.0f,0.0f);
-        Matrix.scaleM(mMMatrix,0,0.1f,-0.1f,0.1f);
 
-        //Matrix.translateM(mMMatrix,0,0.0f,-150f,-100.0f);
-        Matrix.setLookAtM(mVMatrix, 0, 0, 0, -3f, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mVMatrix, 0, 0, 0, -2f, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
         Matrix.multiplyMM(mMVMatrix, 0, mVMatrix, 0, mMMatrix, 0);
         Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mMVMatrix, 0);
@@ -151,7 +137,7 @@ class STLRenderer implements GLSurfaceView.Renderer {
         checkGlError("glVertexAttribPointer");
         // get handle to fragment shader's vColor member
         int mLightHandle = GLES20.glGetUniformLocation(mProgram, "uLightPos");
-        float[] light = new float[]{0f, 1f, 0f};
+        float[] light = new float[]{0f, 0f, -1f};
 
         // Set color for drawing the triangle
         GLES20.glUniform3fv(mLightHandle, 1, light, 0);

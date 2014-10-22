@@ -2,14 +2,18 @@
 <resources>
 
     <string name="app_name">Halloween</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">HELLO</string>
     <string name="fragment_shader">
-precision mediump float;
-varying vec4 vColor;
+precision lowp float;
+uniform vec3 uLightPos;
+varying lowp vec3 fNormal;
+varying vec3 fPosition;
 void main()
 {
-	gl_FragColor = vColor;
+    float distance = length(uLightPos - fPosition);
+    vec3 lightVector = normalize(uLightPos - fPosition);
+    float diffuse = (dot(vec3(fNormal), lightVector)+2.0)/2.0;
+    gl_FragColor = diffuse * vec4(1.0,0.5,0.0,1.0);
+    gl_FragColor[3] = 1.0;
 }
     </string>
 <string name="vertex_shader">
@@ -19,18 +23,12 @@ attribute vec4 vNormal;
 
 uniform mat4 uMVPMatrix;
 uniform mat4 uMVMatrix;
-uniform vec3 uLightPos;
 
-varying vec4 vColor;
+varying lowp  vec3 fNormal;
+varying vec3 fPosition;
 void main() {
-    vec3 MVVertex = vec3(uMVMatrix * vPosition);
-    vec3 MVNormal = vec3(uMVMatrix * vNormal);
-    float distance = length(uLightPos - MVVertex);
-    vec3 lightVector = normalize(uLightPos - MVVertex);
-    float diffuse = max(dot(vec3(MVNormal), lightVector), 0.5);
-    diffuse = diffuse * (1.0 / (1.0 + (0.0000001 * distance)));
-    vColor = diffuse * vec4(1.0,1.0,0.0,1.0);
-    vColor[3] = 1.0;
+    fPosition = vec3(uMVMatrix * vPosition);
+    fNormal = normalize(vec3(uMVMatrix * vNormal));
     gl_Position = uMVPMatrix * vPosition;
 }
 
