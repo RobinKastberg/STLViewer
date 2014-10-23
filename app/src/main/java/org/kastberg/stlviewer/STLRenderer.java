@@ -94,7 +94,6 @@ class STLRenderer implements GLSurfaceView.Renderer {
         Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 1, 100);
     }
     final int COORDS_PER_VERTEX = 3;
-    private int vertexStride = Float.SIZE * COORDS_PER_VERTEX;
     @Override
     public void onDrawFrame(GL10 unused) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);

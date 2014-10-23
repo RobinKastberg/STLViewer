@@ -2,9 +2,9 @@ package org.kastberg.stlviewer;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.util.Log;
+import android.preference.PreferenceManager;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
 
 /**
@@ -14,16 +14,16 @@ public class STLSurfaceView extends GLSurfaceView {
     STLRenderer mRenderer;
     private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
     private static final String TAG = "STLSurfaceView";
-    public STLSurfaceView(Context context) {
-        super(context);
-        boolean isTransparent = context.getSharedPreferences("settings",0).getBoolean("transparent",true);
-        setEGLContextClientVersion(2);
-        if(isTransparent != true) {
-            setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-            getHolder().setFormat(PixelFormat.TRANSLUCENT);
-        }
-        mRenderer = new STLRenderer(this);
-        setRenderer(mRenderer);
+    public STLSurfaceView(Context context, AttributeSet set) {
+        super(context, set);
+            boolean isTransparent = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("transparent", true);
+            setEGLContextClientVersion(2);
+            if (isTransparent) {
+                setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+                getHolder().setFormat(PixelFormat.TRANSLUCENT);
+            }
+            mRenderer = new STLRenderer(this);
+            setRenderer(mRenderer);
         //setRenderMode(RENDERMODE_WHEN_DIRTY);
     }
     float mPreviousX;

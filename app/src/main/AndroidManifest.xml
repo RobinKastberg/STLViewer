@@ -7,7 +7,10 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        <uses-feature android:glEsVersion="0x00020000" android:required="true" />
+        <uses-feature
+            android:glEsVersion="0x00020000"
+            android:required="true" />
+
         <activity
             android:name=".STLActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -15,28 +18,43 @@
             android:theme="@style/FullscreenTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter
-                android:icon='@drawable/ic_launcher'
-                android:label='STLViewer File'
-                android:priority='1'>
+                android:icon="@drawable/ic_launcher"
+                android:label="STLViewer File"
+                android:priority="1" >
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.EDIT" />
                 <action android:name="android.intent.action.PICK" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data android:mimeType="*/*" />
                 <data android:pathPattern="*.stl" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" android:host="*" android:pathPattern=".*\\.stl" />
-                <data android:scheme="https" android:host="*" android:pathPattern=".*\\.stl" />
-            </intent-filter>
 
+                <data
+                    android:host="*"
+                    android:pathPattern=".*\\.stl"
+                    android:scheme="http" />
+                <data
+                    android:host="*"
+                    android:pathPattern=".*\\.stl"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".STLSettingsActivity"
+            android:label="@string/title_activity_stlsettings"
+            android:parentActivityName="org.kastberg.stlviewer.STLActivity">
         </activity>
     </application>
 
