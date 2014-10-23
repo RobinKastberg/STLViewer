@@ -4,6 +4,6 @@
     <CheckBoxPreference
         android:key="transparent"
         android:title="Transparent Background"
-        android:summary=""
+        android:summary="wat"
         android:defaultValue="false" />
 </PreferenceScreen>

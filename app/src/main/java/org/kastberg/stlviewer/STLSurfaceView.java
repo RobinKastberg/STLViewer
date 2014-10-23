@@ -1,11 +1,17 @@
 package org.kastberg.stlviewer;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
+
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 /**
 * Created by robin.kastberg on 2014-10-22.
@@ -14,17 +20,33 @@ public class STLSurfaceView extends GLSurfaceView {
     STLRenderer mRenderer;
     private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
     private static final String TAG = "STLSurfaceView";
+    InputStream is = null;
     public STLSurfaceView(Context context, AttributeSet set) {
         super(context, set);
-            boolean isTransparent = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("transparent", true);
-            setEGLContextClientVersion(2);
-            if (isTransparent) {
-                setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-                getHolder().setFormat(PixelFormat.TRANSLUCENT);
+        boolean isTransparent = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("transparent", true);
+        setEGLContextClientVersion(2);
+        if (isTransparent) {
+            setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+            getHolder().setFormat(PixelFormat.TRANSLUCENT);
+        }
+
+
+        Intent in = ((Activity)getContext()).getIntent();
+        if(in.getAction().equals("android.intent.action.VIEW"))
+            try {
+                is = getContext().getContentResolver().openInputStream(in.getData());
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, in.toString());
+                e.printStackTrace();
             }
-            mRenderer = new STLRenderer(this);
-            setRenderer(mRenderer);
-        //setRenderMode(RENDERMODE_WHEN_DIRTY);
+        else
+            is = getResources().openRawResource(R.raw.boobpoop);
+
+        mRenderer = new STLRenderer(this);
+        setRenderer(mRenderer);
+        setRenderMode(RENDERMODE_WHEN_DIRTY);
+
+        new STLLoaderTask(this.getContext()).execute(is);
     }
     float mPreviousX;
     float mPreviousY;
@@ -61,5 +83,10 @@ public class STLSurfaceView extends GLSurfaceView {
         mPreviousX = x;
         mPreviousY = y;
         return true;
+    }
+
+    public void modelDone(STLModel model) {
+        mRenderer.loadModel(model);
+        requestRender();
     }
 }

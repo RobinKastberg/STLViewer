@@ -16,6 +16,7 @@ public class STLActivity extends Activity {
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         //setTheme(android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER);
+        requestWindowFeature(Window.FEATURE_PROGRESS);
         setContentView(R.layout.main);
     }
 
