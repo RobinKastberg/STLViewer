@@ -1,14 +1,10 @@
 package org.kastberg.stlviewer;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.nio.FloatBuffer;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -69,6 +65,8 @@ class STLRenderer implements GLSurfaceView.Renderer {
         GLES20.glLinkProgram(mProgram);
         Log.e(TAG,GLES20.glGetString(GLES20.GL_EXTENSIONS));
         checkGlError("glLinkProgram");
+        GLES20.glEnable(GLES20.GL_DITHER);
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
     }
     public void loadModel(STLModel model)
     {
@@ -92,8 +90,7 @@ class STLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 unused) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        GLES20.glEnable(GLES20.GL_DITHER);
+
         if(isLoaded) {
             GLES20.glUseProgram(mProgram);
             // get handle to vertex shader's vPosition member

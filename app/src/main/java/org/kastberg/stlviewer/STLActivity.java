@@ -3,19 +3,31 @@ package org.kastberg.stlviewer;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
-import android.view.WindowManager;
 
 public class STLActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                .detectDiskReads()
+                .detectDiskWrites()
+                .detectNetwork()   // or .detectAll() for all detectable problems
+                .penaltyLog()
+                .build());
+        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                .detectLeakedSqlLiteObjects()
+                .detectLeakedClosableObjects()
+                .penaltyLog()
+                .penaltyDeath()
+                .build());
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         //setTheme(android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER);
+        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER);
         requestWindowFeature(Window.FEATURE_PROGRESS);
         setContentView(R.layout.main);
     }

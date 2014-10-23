@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -18,19 +19,13 @@ import java.io.InputStream;
 */
 public class STLSurfaceView extends GLSurfaceView {
     STLRenderer mRenderer;
-    private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
     private static final String TAG = "STLSurfaceView";
     InputStream is = null;
     public STLSurfaceView(Context context, AttributeSet set) {
         super(context, set);
-        boolean isTransparent = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("transparent", true);
         setEGLContextClientVersion(2);
-        if (isTransparent) {
-            setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-            getHolder().setFormat(PixelFormat.TRANSLUCENT);
-        }
-
-
+        setEGLConfigChooser(5, 6, 5, 0, 16, 0);
+        //getHolder().setFormat(PixelFormat.TRANSLUCENT);
         Intent in = ((Activity)getContext()).getIntent();
         if(in.getAction().equals("android.intent.action.VIEW"))
             try {
@@ -51,7 +46,7 @@ public class STLSurfaceView extends GLSurfaceView {
     float mPreviousX;
     float mPreviousY;
     @Override
-    public boolean onTouchEvent(MotionEvent e) {
+    public boolean onTouchEvent(@NonNull MotionEvent e) {
         // MotionEvent reports input details from the touch screen
         // and other input controls. In this case, you are only
         // interested in events where the touch position changed.
@@ -75,6 +70,7 @@ public class STLSurfaceView extends GLSurfaceView {
                     dy = dy * -1 ;
                 }
 
+                float TOUCH_SCALE_FACTOR = 180.0f / 320;
                 mRenderer.mAngle = mRenderer.mAngle +
                                 ((dx + dy) * TOUCH_SCALE_FACTOR);  // = 180.0f / 320
                 requestRender();

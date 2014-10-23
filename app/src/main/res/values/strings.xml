@@ -11,7 +11,7 @@ void main()
     float distance = length(uLightPos - fPosition);
     vec3 lightVector = normalize(uLightPos - fPosition);
     float diffuse = (dot(vec3(fNormal), lightVector)+2.0)/2.0;
-    gl_FragColor = diffuse * vec4(1.0,0.5,0.0,1.0);
+    gl_FragColor = diffuse * vec4(1.0,1.0,1.0,1.0);
     gl_FragColor[3] = 1.0;
 }</string>
     <string name="vertex_shader">attribute vec4 vPosition;
@@ -28,5 +28,6 @@ void main() {
     gl_Position = uMVPMatrix * vPosition;
 }</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="settings">Settings</string>
 
 </resources>
