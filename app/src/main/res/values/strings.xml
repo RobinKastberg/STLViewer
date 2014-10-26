@@ -2,9 +2,9 @@
 <resources>
 
     <string name="app_name">Halloween</string>
-    <string name="fragment_shader">precision lowp float;
+    <string name="fragment_shader">precision mediump float;
 uniform vec3 uLightPos;
-varying lowp vec3 fNormal;
+varying vec3 fNormal;
 varying vec3 fPosition;
 void main()
 {
@@ -20,17 +20,47 @@ attribute vec4 vNormal;
 uniform mat4 uMVPMatrix;
 uniform mat4 uMVMatrix;
 
-varying lowp  vec3 fNormal;
+varying vec3 fNormal;
 varying vec3 fPosition;
 void main() {
     fPosition = vec3(uMVMatrix * vPosition);
     fNormal = normalize(vec3(uMVMatrix * vNormal));
     gl_Position = uMVPMatrix * vPosition;
 }</string>
+        <string name="stone_fragment_shader">precision highp float;
+uniform vec3 uLightPos;
+uniform mat4 uMVMatrix;
+
+varying vec3 fPosition;
+void main()
+{
+
+    float v = atan(fPosition.y, fPosition.x);
+    float u = asin(fPosition.x/cos(v));
+    vec3 r_u = vec3(cos(u)*cos(v), cos(u)*sin(v), (-sin(u)-3.0*cos(u)*cos(u)*sin(u))/4.0);
+    vec3 r_v = vec3(-sin(u)*sin(v), sin(u)*cos(v), 0.0);
+    vec3 fNormal = normalize(cross(r_u, r_v));
+    fNormal = normalize(mat3(uMVMatrix) * vec3(fNormal));
+    float distance = length(uLightPos - fPosition);
+    vec3 lightVector = normalize(uLightPos - fPosition);
+    float diffuse = clamp(dot(fNormal, lightVector),0.0,1.0);
+    gl_FragColor = (diffuse + 0.6)* vec4(1.0,1.0,1.0,1.0);
+    gl_FragColor[3] = 1.0;
+}</string>
+        <string name="stone_vertex_shader">attribute vec4 vPosition;
+attribute vec4 vNormal;
+
+uniform mat4 uMVPMatrix;
+
+varying vec3 fPosition;
+void main() {
+    fPosition = vec3(vPosition);
+    gl_Position = uMVPMatrix * (vPosition+vNormal*0.000000000000000000001);
+}</string>
 
         <string name="goban_fragment_shader">precision mediump float;
 uniform vec3 uLightPos;
-varying vec3 fNormal;
+varying highp vec3 fNormal;
 varying vec3 fPos;
 
 

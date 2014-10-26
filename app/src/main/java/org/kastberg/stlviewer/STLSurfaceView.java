@@ -35,7 +35,7 @@ public class STLSurfaceView extends GLSurfaceView {
                 e.printStackTrace();
             }
         else
-            is = getResources().openRawResource(R.raw.cube);
+            is = getResources().openRawResource(R.raw.stone);
 
         mRenderer = new STLRenderer(this);
         setRenderer(mRenderer);

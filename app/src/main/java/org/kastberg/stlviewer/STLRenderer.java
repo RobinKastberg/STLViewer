@@ -54,11 +54,10 @@ class STLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig eglConfig) {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
         int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER,
-                glSurfaceView.getResources().getString(R.string.goban_vertex_shader));
+                glSurfaceView.getResources().getString(R.string.stone_vertex_shader));
         int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER,
-                glSurfaceView.getResources().getString(R.string.goban_fragment_shader));
+                glSurfaceView.getResources().getString(R.string.stone_fragment_shader));
 
         mProgram = GLES20.glCreateProgram();             // create empty OpenGL ES Program
         GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
@@ -71,7 +70,7 @@ class STLRenderer implements GLSurfaceView.Renderer {
     }
     public void loadModel(STLModel model)
     {
-        model.center();
+        //model.center();
         //model.scale();
         vertexBuffer = model.vertex;
         Log.e(TAG,vertexBuffer.toString());
@@ -85,8 +84,8 @@ class STLRenderer implements GLSurfaceView.Renderer {
         float ratio = (float) width / height;
 
         // create a projection matrix from device screen geometry
-        //Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 0.1f, 3);
-        Matrix.perspectiveM(mProjMatrix,0,90.0f,ratio, 0.1f, 3.0f);
+        Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 0.1f, 3);
+        //Matrix.perspectiveM(mProjMatrix,0,90.0f,ratio, 0.1f, 3.0f);
     }
     final int COORDS_PER_VERTEX = 3;
     @Override
