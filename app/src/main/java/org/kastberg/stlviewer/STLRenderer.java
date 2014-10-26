@@ -41,7 +41,8 @@ class STLRenderer implements GLSurfaceView.Renderer {
             throw new RuntimeException(glOperation + ": glError " + error);
         }
     }
-    public volatile float mAngle;
+    public volatile float mAngleX = 0.0f;
+    public volatile float mAngleY = 30.0f;
 
     private FloatBuffer vertexBuffer;
     private FloatBuffer normalBuffer;
@@ -55,9 +56,9 @@ class STLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
         int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER,
-                glSurfaceView.getResources().getString(R.string.vertex_shader));
+                glSurfaceView.getResources().getString(R.string.goban_vertex_shader));
         int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER,
-                glSurfaceView.getResources().getString(R.string.fragment_shader));
+                glSurfaceView.getResources().getString(R.string.goban_fragment_shader));
 
         mProgram = GLES20.glCreateProgram();             // create empty OpenGL ES Program
         GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
@@ -71,10 +72,10 @@ class STLRenderer implements GLSurfaceView.Renderer {
     public void loadModel(STLModel model)
     {
         model.center();
-        model.scale();
-        vertexBuffer = model.vertexBuffer();
+        //model.scale();
+        vertexBuffer = model.vertex;
         Log.e(TAG,vertexBuffer.toString());
-        normalBuffer = model.normalBuffer();
+        normalBuffer = model.normal;
         vertexCount = model.len;
         isLoaded = true;
     }
@@ -84,14 +85,14 @@ class STLRenderer implements GLSurfaceView.Renderer {
         float ratio = (float) width / height;
 
         // create a projection matrix from device screen geometry
-        Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 1, 100);
+        //Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 0.1f, 3);
+        Matrix.perspectiveM(mProjMatrix,0,90.0f,ratio, 0.1f, 3.0f);
     }
     final int COORDS_PER_VERTEX = 3;
     @Override
     public void onDrawFrame(GL10 unused) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-
-        if(isLoaded) {
+            if(isLoaded) {
             GLES20.glUseProgram(mProgram);
             // get handle to vertex shader's vPosition member
             int mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
@@ -104,9 +105,10 @@ class STLRenderer implements GLSurfaceView.Renderer {
             float[] mMMatrix = new float[16];
             float[] mMVMatrix = new float[16];
             Matrix.setIdentityM(mMMatrix, 0);
-            Matrix.rotateM(mMMatrix, 0, mAngle, -1.0f, 0.0f, 0.0f);
+            Matrix.rotateM(mMMatrix, 0, mAngleY, -1.0f, 0.0f, 0.0f);
+            Matrix.rotateM(mMMatrix, 0, mAngleX, 0.0f, -1.0f, 0.0f);
 
-            Matrix.setLookAtM(mVMatrix, 0, 0, 0, -2f, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+            Matrix.setLookAtM(mVMatrix, 0, 0, 0.5f, -1.5f, 0f, 0.0f, 0.0f, 0f, 1.0f, 0.0f);
 
             Matrix.multiplyMM(mMVMatrix, 0, mVMatrix, 0, mMMatrix, 0);
             Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mMVMatrix, 0);
@@ -129,11 +131,14 @@ class STLRenderer implements GLSurfaceView.Renderer {
             checkGlError("glVertexAttribPointer");
             // get handle to fragment shader's vColor member
             int mLightHandle = GLES20.glGetUniformLocation(mProgram, "uLightPos");
-            float[] light = new float[]{0f, 0f, -1f};
+            float[] light = new float[]{0f, 0f, 0f,1f};
+            float[] eye = new float[4];
 
+            float[] lol = new float[16];
+            Matrix.invertM(lol,0,mMVMatrix,0);
+            Matrix.multiplyMV(eye,0,lol,0,light,0);
             // Set color for drawing the triangle
-            GLES20.glUniform3fv(mLightHandle, 1, light, 0);
-
+            GLES20.glUniform3fv(mLightHandle, 1, eye, 0);
             // Draw the triangle
             GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
             checkGlError("glDrawArrays");

@@ -37,26 +37,34 @@ public class STLLoaderTask extends AsyncTask<InputStream, Integer, STLModel> {
         wrapped = wrapped.order(ByteOrder.LITTLE_ENDIAN);
         int numOfTriangles = (int)(((long)wrapped.getInt()&0xffffffff));
         STLModel model = new STLModel(numOfTriangles*3);
+        byte[] triangle = new byte[50*numOfTriangles];
+        try {
+            is.read(triangle);
+        } catch(IOException e) {
+            Log.e(TAG,"you are bad and should feel bad.");
+        }
+        ByteBuffer ary = ByteBuffer.wrap(triangle);
         for(int i=0;i<numOfTriangles;i++)
         {
-            byte[] triangle = new byte[50];
-            try {
-                is.read(triangle);
-            } catch(IOException e) {
-                Log.e(TAG,"you are bad and should feel bad.");
-            }
-            FloatBuffer normal = ByteBuffer.wrap(triangle,0,12).order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer();
-            FloatBuffer tri = ByteBuffer.wrap(triangle, 12, 4 * 3 * 3).order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer();
             //Log.e(TAG,normal.toString());
-            for(int j=0;j<3;j++) {
-                tri.get(model.vertex, 3 * 3 * i + j * 3, 3);
-                normal.get(model.normal,3*3*i+j*3,3);
-                normal.position(0);
-                short attr = ByteBuffer.wrap(triangle, 48, 2).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(0);
-            }
-            if(i%100==0)
+            ary.limit(50*i+12);
+            ary.position(50*i);
+            model.normalByte.put(ary);
+            ary.position(50*i);
+            model.normalByte.put(ary);
+            ary.position(50*i);
+            model.normalByte.put(ary);
+
+            ary.limit(50*i+48);
+            ary.position(50*i+12);
+            model.vertexByte.put(ary);
+
+
+            if(i%1000==0)
                 publishProgress(10000*(int)((float)i)/numOfTriangles);
         }
+        model.normal.position(0);
+        model.vertex.position(0);
         return model;
     }
 

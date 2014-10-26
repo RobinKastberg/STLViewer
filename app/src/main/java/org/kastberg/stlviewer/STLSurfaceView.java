@@ -35,7 +35,7 @@ public class STLSurfaceView extends GLSurfaceView {
                 e.printStackTrace();
             }
         else
-            is = getResources().openRawResource(R.raw.boobpoop);
+            is = getResources().openRawResource(R.raw.cube);
 
         mRenderer = new STLRenderer(this);
         setRenderer(mRenderer);
@@ -57,9 +57,9 @@ public class STLSurfaceView extends GLSurfaceView {
         switch (e.getAction()) {
             case MotionEvent.ACTION_MOVE:
 
-                float dx = x - mPreviousX;
+                float dx = mPreviousX - x;
                 float dy = y - mPreviousY;
-
+                /*
                 // reverse direction of rotation above the mid-line
                 if (y > getHeight() / 2) {
                     dx = dx * -1 ;
@@ -69,10 +69,14 @@ public class STLSurfaceView extends GLSurfaceView {
                 if (x < getWidth() / 2) {
                     dy = dy * -1 ;
                 }
+                */
 
-                float TOUCH_SCALE_FACTOR = 180.0f / 320;
-                mRenderer.mAngle = mRenderer.mAngle +
-                                ((dx + dy) * TOUCH_SCALE_FACTOR);  // = 180.0f / 320
+                float TOUCH_SCALE_FACTOR_X = 180.0f / 320;
+                float TOUCH_SCALE_FACTOR_Y = 90.0f / 320;
+                mRenderer.mAngleX += dx  * TOUCH_SCALE_FACTOR_X;
+                mRenderer.mAngleY += dy  * TOUCH_SCALE_FACTOR_Y;
+                mRenderer.mAngleY = Math.min(mRenderer.mAngleY, 90.0f);
+                mRenderer.mAngleY = Math.max(mRenderer.mAngleY, -90.0f);
                 requestRender();
         }
 
