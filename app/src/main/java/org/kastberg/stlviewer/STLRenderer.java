@@ -221,7 +221,8 @@ class STLRenderer implements GLSurfaceView.Renderer {
             Matrix.rotateM(mMMatrix, 0, mAngleY, -1.0f, 0.0f, 0.0f);
             Matrix.rotateM(mMMatrix, 0, mAngleX, 0.0f, -1.0f, 0.0f);
             //Matrix.setLookAtM(mVMatrix, 0, 0, 1.0f, 0.0f, 0f, 0.0f, 0.0f, 0f, 0.0f, 1.0f);
-            Matrix.setLookAtM(mVMatrix, 0, 0, 0.5f, -1.5f, 0f, 0.0f, 0.0f, 0f, 1.0f, 0.0f);
+            Matrix.setLookAtM(mVMatrix, 0, 0, 0.5f, -1.0f, 0f, 0.0f, 0.0f, 0f, 1.0f, 0.0f);
+
 
             Matrix.multiplyMM(mMVMatrix, 0, mVMatrix, 0, mMMatrix, 0);
             Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mMVMatrix, 0);
