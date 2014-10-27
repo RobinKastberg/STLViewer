@@ -206,8 +206,8 @@ class STLRenderer implements GLSurfaceView.Renderer {
             //Matrix.setIdentityM(mProjMatrix,0);
             //Matrix.orthoM(mProjMatrix,0, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
             // create a projection matrix from device screen geometry
-            //Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 0.1f, 3);
-            Matrix.perspectiveM(mProjMatrix,0,90.0f,ratio, 0.1f, 3.0f);
+            Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 0.1f, 3);
+            //Matrix.perspectiveM(mProjMatrix,0,90.0f,ratio, 0.1f, 3.0f);
             GLES20.glUseProgram(renderShader);
             // get handle to vertex shader's vPosition member
             int mPositionHandle = GLES20.glGetAttribLocation(renderShader, "vPosition");
