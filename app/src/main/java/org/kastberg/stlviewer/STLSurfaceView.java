@@ -27,6 +27,7 @@ public class STLSurfaceView extends GLSurfaceView {
         super(context, set);
         setEGLContextClientVersion(2);
         setEGLConfigChooser(5, 6, 5, 0, 16, 0);
+        setPreserveEGLContextOnPause(true);
         //getHolder().setFormat(PixelFormat.TRANSLUCENT);
         Intent in = ((Activity)getContext()).getIntent();
         if(in.getAction().equals("android.intent.action.VIEW"))
@@ -40,6 +41,7 @@ public class STLSurfaceView extends GLSurfaceView {
             is = getResources().openRawResource(R.raw.stone);
 
         mRenderer = new STLRenderer(this);
+        setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
         setRenderer(mRenderer);
         setRenderMode(RENDERMODE_WHEN_DIRTY);
 
@@ -51,6 +53,7 @@ public class STLSurfaceView extends GLSurfaceView {
     }
     float mPreviousX;
     float mPreviousY;
+
     @Override
     public boolean onTouchEvent(@NonNull MotionEvent e) {
         // MotionEvent reports input details from the touch screen

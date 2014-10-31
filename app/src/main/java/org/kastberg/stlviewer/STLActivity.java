@@ -2,6 +2,7 @@ package org.kastberg.stlviewer;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.view.Menu;
@@ -10,6 +11,7 @@ import android.view.MenuItem;
 import android.view.Window;
 
 public class STLActivity extends Activity {
+    GLSurfaceView mGLView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +33,18 @@ public class STLActivity extends Activity {
         //getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER);
         requestWindowFeature(Window.FEATURE_PROGRESS);
         setContentView(R.layout.main);
+        mGLView = (GLSurfaceView)findViewById(R.id.surfaceView);
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mGLView.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mGLView.onResume();
     }
 
     @Override

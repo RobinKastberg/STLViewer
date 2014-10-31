@@ -19,6 +19,7 @@ public class STLModel extends STLNode {
     int len;
     private static final String TAG = "STLModel";
     STLModel(int numberOfVertices) {
+        super(TAG);
         len = numberOfVertices;
         vertexByte = ByteBuffer.allocateDirect(4*3*len).order(ByteOrder.nativeOrder());
         normalByte = ByteBuffer.allocateDirect(4*3*len).order(ByteOrder.nativeOrder());
