@@ -25,6 +25,8 @@ class STLRenderer implements GLSurfaceView.Renderer {
     public STLRenderer(STLSurfaceView glSurfaceView) {
 
         this.glSurfaceView = glSurfaceView;
+        w = glSurfaceView.getWidth();
+        h = glSurfaceView.getHeight();
     }
 
     public static int loadShader(int type, String shaderCode){
@@ -114,8 +116,10 @@ class STLRenderer implements GLSurfaceView.Renderer {
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER,
                 GLES20.GL_LINEAR_MIPMAP_LINEAR);
         GLES20.glHint(GLES20.GL_GENERATE_MIPMAP_HINT, GLES20.GL_NICEST);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES11Ext.GL_TEXTURE_MAX_ANISOTROPY_EXT,
-                4);
+        float[] max_aniso = new float[1];
+        GLES20.glGetFloatv(GLES11Ext.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, max_aniso, 0);
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES11Ext.GL_TEXTURE_MAX_ANISOTROPY_EXT,
+                max_aniso[0]);
         //Buffer texBuffer = ByteBuffer.allocateDirect(texW * texH * 2);
         GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB, texW, texH, 0, GLES20.GL_RGB,GLES20.GL_UNSIGNED_BYTE, null);
 
@@ -206,7 +210,12 @@ class STLRenderer implements GLSurfaceView.Renderer {
             //Matrix.setIdentityM(mProjMatrix,0);
             //Matrix.orthoM(mProjMatrix,0, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
             // create a projection matrix from device screen geometry
-            Matrix.frustumM(mProjMatrix, 0, -ratio, ratio, -1, 1, 0.1f, 3);
+
+            float zNear = 0.1f;
+            float zFar = 3.0f;
+            float fH = (float)Math.tan( 90.0 / 360 * Math.PI ) * zNear;
+            float fW = fH * ratio;
+            Matrix.frustumM(mProjMatrix, 0, -fW, fW, -fH, fH, zNear, 3.0f);
             //Matrix.perspectiveM(mProjMatrix,0,90.0f,ratio, 0.1f, 3.0f);
             GLES20.glUseProgram(renderShader);
             // get handle to vertex shader's vPosition member
@@ -221,7 +230,7 @@ class STLRenderer implements GLSurfaceView.Renderer {
             Matrix.rotateM(mMMatrix, 0, mAngleY, -1.0f, 0.0f, 0.0f);
             Matrix.rotateM(mMMatrix, 0, mAngleX, 0.0f, -1.0f, 0.0f);
             //Matrix.setLookAtM(mVMatrix, 0, 0, 1.0f, 0.0f, 0f, 0.0f, 0.0f, 0f, 0.0f, 1.0f);
-            Matrix.setLookAtM(mVMatrix, 0, 0, 0.5f, -1.0f, 0f, 0.0f, 0.0f, 0f, 1.0f, 0.0f);
+            Matrix.setLookAtM(mVMatrix, 0, 0, 1.0f, -1.0f, 0f, 0.0f, 0.0f, 0f, 1.0f, 0.0f);
 
 
             Matrix.multiplyMM(mMVMatrix, 0, mVMatrix, 0, mMMatrix, 0);
