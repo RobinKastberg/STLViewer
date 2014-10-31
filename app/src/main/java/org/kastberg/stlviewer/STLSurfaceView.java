@@ -21,6 +21,8 @@ public class STLSurfaceView extends GLSurfaceView {
     STLRenderer mRenderer;
     private static final String TAG = "STLSurfaceView";
     InputStream is = null;
+    STLSceneGraph sg;
+    STLNode camera;
     public STLSurfaceView(Context context, AttributeSet set) {
         super(context, set);
         setEGLContextClientVersion(2);
@@ -42,6 +44,10 @@ public class STLSurfaceView extends GLSurfaceView {
         setRenderMode(RENDERMODE_WHEN_DIRTY);
 
         new STLLoaderTask(this.getContext()).execute(is);
+        sg = new STLSceneGraph();
+        camera = new STLNode(null);
+        sg.children.add(camera);
+
     }
     float mPreviousX;
     float mPreviousY;
@@ -86,7 +92,9 @@ public class STLSurfaceView extends GLSurfaceView {
     }
 
     public void modelDone(STLModel model) {
-        mRenderer.loadModel(model);
+        model.setShader(getContext().getResources().getString(R.string.vertex_shader), getContext().getResources().getString(R.string.fragment_shader));
+        model.parent = camera;
+        camera.children.add(model);
         requestRender();
     }
 }

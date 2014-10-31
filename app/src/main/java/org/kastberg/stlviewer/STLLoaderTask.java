@@ -60,7 +60,7 @@ public class STLLoaderTask extends AsyncTask<InputStream, Integer, STLModel> {
             model.vertexByte.put(ary);
 
 
-            if(i%1000==0)
+            if(i%100==0)
                 publishProgress(10000*(int)((float)i)/numOfTriangles);
         }
         model.normal.position(0);
@@ -81,10 +81,10 @@ public class STLLoaderTask extends AsyncTask<InputStream, Integer, STLModel> {
         ((Activity)context).setProgressBarVisibility(true);
     }
     @Override
-    protected void onPostExecute(STLModel models) {
+    protected void onPostExecute(STLModel model) {
         //((Activity)context).setProgressBarVisibility(false);
         ((Activity)context).setProgress(10000);
-        ((STLSurfaceView)((Activity)context).findViewById(R.id.surfaceView)).modelDone(models);
+        ((STLSurfaceView)((Activity)context).findViewById(R.id.surfaceView)).modelDone(model);
         Log.e(TAG,"onPostExecute");
         //((Activity)context).setProgress(1);
     }

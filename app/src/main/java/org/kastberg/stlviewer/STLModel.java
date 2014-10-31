@@ -1,5 +1,6 @@
 package org.kastberg.stlviewer;
 
+import android.opengl.GLES20;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
@@ -9,7 +10,8 @@ import java.nio.FloatBuffer;
 /**
  * Created by kastberg on 10/22/2014.
  */
-public class STLModel {
+public class STLModel extends STLNode {
+    private static final int COORDS_PER_VERTEX = 3;
     public FloatBuffer vertex;
     public FloatBuffer normal;
     public ByteBuffer vertexByte;
@@ -60,16 +62,25 @@ public class STLModel {
             }
         }
     }
-    public FloatBuffer vertexBuffer() {
-        FloatBuffer buf = ByteBuffer.allocateDirect(4*3*len).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        buf.put(vertex);
-        buf.position(0);
-        return buf;
-    }
-    public FloatBuffer normalBuffer() {
-        FloatBuffer buf = ByteBuffer.allocateDirect(4*3*len).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        buf.put(normal);
-        buf.position(0);
-        return buf;
+
+    @Override
+    public void in()
+    {
+        super.in();
+        int mPositionHandle = GLES20.glGetAttribLocation(program, "vPosition");
+        int mNormalHandle = GLES20.glGetAttribLocation(program, "vNormal");
+        GLES20.glEnableVertexAttribArray(mPositionHandle);
+        GLES20.glEnableVertexAttribArray(mNormalHandle);
+        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
+                GLES20.GL_FLOAT, false,
+                0, vertex);
+        GLES20.glVertexAttribPointer(mNormalHandle, COORDS_PER_VERTEX,
+                GLES20.GL_FLOAT, false,
+                0, normal);
+
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, len);
+
+        GLES20.glDisableVertexAttribArray(mPositionHandle);
+        GLES20.glDisableVertexAttribArray(mNormalHandle);
     }
 }

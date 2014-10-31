@@ -20,27 +20,7 @@ class STLRenderer implements GLSurfaceView.Renderer {
         this.glSurfaceView = glSurfaceView;
     }
 
-    public static int loadShader(int type, String shaderCode){
 
-        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
-        int shader = GLES20.glCreateShader(type);
-
-        // add the source code to the shader and compile it
-        GLES20.glShaderSource(shader, shaderCode);
-        GLES20.glCompileShader(shader);
-        Log.e(TAG, GLES20.glGetShaderInfoLog(shader));
-
-        return shader;
-    }
-
-    public void checkGlError(String glOperation) {
-        int error;
-        while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
-            Log.e(TAG, glOperation + ": glError " + error);
-            throw new RuntimeException(glOperation + ": glError " + error);
-        }
-    }
     public volatile float mAngleX = 0.0f;
     public volatile float mAngleY = 30.0f;
 
@@ -54,29 +34,9 @@ class STLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig eglConfig) {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER,
-                glSurfaceView.getResources().getString(R.string.stone_vertex_shader));
-        int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER,
-                glSurfaceView.getResources().getString(R.string.stone_fragment_shader));
 
-        mProgram = GLES20.glCreateProgram();             // create empty OpenGL ES Program
-        GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
-        GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
-        GLES20.glLinkProgram(mProgram);
-        Log.e(TAG,GLES20.glGetString(GLES20.GL_EXTENSIONS));
-        checkGlError("glLinkProgram");
         GLES20.glEnable(GLES20.GL_DITHER);
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-    }
-    public void loadModel(STLModel model)
-    {
-        //model.center();
-        //model.scale();
-        vertexBuffer = model.vertex;
-        Log.e(TAG,vertexBuffer.toString());
-        normalBuffer = model.normal;
-        vertexCount = model.len;
-        isLoaded = true;
     }
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
@@ -94,10 +54,6 @@ class STLRenderer implements GLSurfaceView.Renderer {
             if(isLoaded) {
             GLES20.glUseProgram(mProgram);
             // get handle to vertex shader's vPosition member
-            int mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
-            checkGlError("glGetAttribLocation");
-            int mNormalHandle = GLES20.glGetAttribLocation(mProgram, "vNormal");
-            checkGlError("glGetAttribLocation");
             int muMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
             int muMVMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVMatrix");
             float[] mMVPMatrix = new float[16];
@@ -111,39 +67,15 @@ class STLRenderer implements GLSurfaceView.Renderer {
 
             Matrix.multiplyMM(mMVMatrix, 0, mVMatrix, 0, mMMatrix, 0);
             Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mMVMatrix, 0);
-            GLES20.glUniformMatrix4fv(muMVMatrixHandle, 1, false, mMVMatrix, 0);
-            GLES20.glUniformMatrix4fv(muMVPMatrixHandle, 1, false, mMVPMatrix, 0);
-            checkGlError("glEnableVertexAttribArray");
-            // Enable a handle to the triangle vertices
-            GLES20.glEnableVertexAttribArray(mPositionHandle);
-            checkGlError("glEnableVertexAttribArray");
-            GLES20.glEnableVertexAttribArray(mNormalHandle);
-            checkGlError("glEnableVertexAttribArray");
-            // Prepare the triangle coordinate data
-            GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
-                    GLES20.GL_FLOAT, false,
-                    0, vertexBuffer);
-            checkGlError("glVertexAttribPointer");
-            GLES20.glVertexAttribPointer(mNormalHandle, COORDS_PER_VERTEX,
-                    GLES20.GL_FLOAT, false,
-                    0, normalBuffer);
-            checkGlError("glVertexAttribPointer");
-            // get handle to fragment shader's vColor member
+
+            glSurfaceView.camera.matrix = mMVPMatrix;
+
             int mLightHandle = GLES20.glGetUniformLocation(mProgram, "uLightPos");
             float[] light = new float[]{0f, 0f, 0f,1f};
-            float[] eye = new float[4];
+            GLES20.glUniform3fv(mLightHandle, 1, light, 0);
 
-            float[] lol = new float[16];
-            Matrix.invertM(lol,0,mMVMatrix,0);
-            Matrix.multiplyMV(eye,0,lol,0,light,0);
-            // Set color for drawing the triangle
-            GLES20.glUniform3fv(mLightHandle, 1, eye, 0);
-            // Draw the triangle
-            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
-            checkGlError("glDrawArrays");
-            // Disable vertex array
-            GLES20.glDisableVertexAttribArray(mPositionHandle);
-            GLES20.glDisableVertexAttribArray(mNormalHandle);
+
+            glSurfaceView.sg.render();
         }
     }
 }
