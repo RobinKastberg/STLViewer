@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="org.kastberg.stlviewer" >
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
     <application
@@ -39,7 +40,9 @@
         </activity>
         <activity
             android:name=".STLSettingsActivity"
-            android:parentActivityName=".STLActivity" >
+            android:parentActivityName=".STLActivity"
+            android:theme="@android:style/Theme.Holo.Light.Dialog"
+            tools:ignore="UnusedAttribute">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

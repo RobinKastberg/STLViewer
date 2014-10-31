@@ -3,9 +3,7 @@ package org.kastberg.stlviewer;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -15,21 +13,24 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 /**
-* Created by robin.kastberg on 2014-10-22.
-*/
+ * Created by robin.kastberg on 2014-10-22.
+ */
 public class STLSurfaceView extends GLSurfaceView {
-    STLRenderer mRenderer;
     private static final String TAG = "STLSurfaceView";
-    InputStream is = null;
-    STLSceneGraph sg;
-    STLNode camera;
+    private final STLRenderer mRenderer;
+    private InputStream is = null;
+    final STLSceneGraph sg;
+    final STLNode camera;
+    private float mPreviousX;
+    private float mPreviousY;
     public STLSurfaceView(Context context, AttributeSet set) {
         super(context, set);
         setEGLContextClientVersion(2);
         setEGLConfigChooser(5, 6, 5, 0, 16, 0);
+        setPreserveEGLContextOnPause(true);
         //getHolder().setFormat(PixelFormat.TRANSLUCENT);
-        Intent in = ((Activity)getContext()).getIntent();
-        if(in.getAction().equals("android.intent.action.VIEW"))
+        Intent in = ((Activity) getContext()).getIntent();
+        if (in.getAction().equals("android.intent.action.VIEW"))
             try {
                 is = getContext().getContentResolver().openInputStream(in.getData());
             } catch (FileNotFoundException e) {
@@ -40,6 +41,7 @@ public class STLSurfaceView extends GLSurfaceView {
             is = getResources().openRawResource(R.raw.stone);
 
         mRenderer = new STLRenderer(this);
+        setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
         setRenderer(mRenderer);
         setRenderMode(RENDERMODE_WHEN_DIRTY);
 
@@ -49,8 +51,7 @@ public class STLSurfaceView extends GLSurfaceView {
         sg.children.add(camera);
 
     }
-    float mPreviousX;
-    float mPreviousY;
+
     @Override
     public boolean onTouchEvent(@NonNull MotionEvent e) {
         // MotionEvent reports input details from the touch screen
@@ -79,8 +80,8 @@ public class STLSurfaceView extends GLSurfaceView {
 
                 float TOUCH_SCALE_FACTOR_X = 180.0f / 320;
                 float TOUCH_SCALE_FACTOR_Y = 90.0f / 320;
-                mRenderer.mAngleX += dx  * TOUCH_SCALE_FACTOR_X;
-                mRenderer.mAngleY += dy  * TOUCH_SCALE_FACTOR_Y;
+                mRenderer.mAngleX += dx * TOUCH_SCALE_FACTOR_X;
+                mRenderer.mAngleY += dy * TOUCH_SCALE_FACTOR_Y;
                 mRenderer.mAngleY = Math.min(mRenderer.mAngleY, 90.0f);
                 mRenderer.mAngleY = Math.max(mRenderer.mAngleY, -90.0f);
                 requestRender();
