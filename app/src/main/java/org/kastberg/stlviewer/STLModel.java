@@ -1,6 +1,8 @@
 package org.kastberg.stlviewer;
 
 import android.opengl.GLES20;
+import android.opengl.Matrix;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
@@ -63,10 +65,21 @@ public class STLModel extends STLNode {
     }
 
     @Override
-    public void in() {
-        super.in();
-        int mPositionHandle = GLES20.glGetAttribLocation(program, "vPosition");
-        int mNormalHandle = GLES20.glGetAttribLocation(program, "vNormal");
+    public void pre(STLSceneGraph sg) {
+        long time = SystemClock.uptimeMillis() % 4000L;
+        float angle = 0.090f * ((int) time);
+        Matrix.setRotateM(modelMatrix, 0, angle, 0, 1f, 0);
+        super.pre(sg);
+    }
+
+    @Override
+    public void in(STLSceneGraph sg) {
+        super.in(sg);
+
+        setVec4("materialColor", new float[]{1.0f, 1.0f, 1.0f, 1.0f});
+
+        int mPositionHandle = GLES20.glGetAttribLocation(program, "vertex");
+        int mNormalHandle = GLES20.glGetAttribLocation(program, "normal");
         GLES20.glEnableVertexAttribArray(mPositionHandle);
         GLES20.glEnableVertexAttribArray(mNormalHandle);
         GLES20.glVertexAttribPointer(mPositionHandle, 3,

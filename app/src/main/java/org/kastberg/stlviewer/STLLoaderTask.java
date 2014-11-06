@@ -60,6 +60,8 @@ class STLLoaderTask extends AsyncTask<InputStream, Integer, STLModel> {
         }
         model.normal.position(0);
         model.vertex.position(0);
+        model.center();
+        model.scale();
         return model;
     }
 

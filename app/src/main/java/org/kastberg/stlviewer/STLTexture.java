@@ -16,8 +16,8 @@ public class STLTexture extends STLNode {
     private final int[] texMax = new int[1];
 
     @Override
-    public void pre() {
-        super.pre();
+    public void pre(STLSceneGraph sg) {
+        super.pre(sg);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         if (GLES20.glIsTexture(renderTex[0])) {
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, renderTex[0]);

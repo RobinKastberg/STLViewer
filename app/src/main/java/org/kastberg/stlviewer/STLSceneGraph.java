@@ -5,7 +5,10 @@ import java.util.List;
 
 class STLSceneGraph {
     private static final String TAG = "STLSceneGraph";
+    public STLCamera camera = null;
     public final List<STLNode> children = new LinkedList<STLNode>();
+    public final List<Integer> shaders = new LinkedList<Integer>();
+
 
     public void render() {
         for (STLNode n : children) {
@@ -14,11 +17,11 @@ class STLSceneGraph {
     }
 
     void render(STLNode node) {
-        node.pre();
+        node.pre(this);
         for (STLNode n : node.children) {
             render(n);
-            n.in();
+            n.in(this);
         }
-        node.post();
+        node.post(this);
     }
 }
